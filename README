@@ -1,0 +1,44 @@
+****** HOW TO INSTALL backup postgres ******
+
+***1./ 
+copier script bash sur le serveur cible dans opt de préférence via ssh
+scp -P <port>  save_openerp_all.sh root@<serveur_cible>:/opt/.
+
+***2./
+***** SUR LE SERVEUR CIBLE *****
+mkdir -p /home/openerp
+----modifier ou rajouter /etc/postgresql/<VERSION>/main/pg_hba.conf
+
+# TYPE        DATABASE        USER        ADDRESS        METHOD
+  local        all           openerp                      trust 
+
+
+----Créer une paire de clé ssh si n'est pas déjà le cas
+ssh-keygen -t rsa
+----Puis la copier sur le serveur de backup ( se référencer en interne pour connaître l'ip du serveur de backup)
+ssh copy-id -i ~/.ssh/id_rsa.pub "root@<serveur_backup> -p <PORT>"
+
+----Modifier les variables du fichier save_openerp_all.sh pour l'adapter à vos besoins
+# Adresse IP serveru sauvegarde
+IP_BACKUP='10.254.30.42'
+
+# Port ssh backup server
+PORT_SSH='22'
+
+# Dossier de sauvegarde sur le serveur
+SAVE_PATH_BACKUP='/opt/BACKUP_DATABASE/TEST/'
+
+----Rendre le script executable
+chown root:root ./save_openerp_all.sh
+chmod u+x ./save_openerp_all.sh
+
+----Effectuer un test :
+bash ./save_openerp_all.sh
+
+----Si OK Alors ne reste plus qu'à automatiser tout ça avec un petit de crontab ;)
+
+crontab -e 
+
+*/5 * * * *     bash /opt/save_openerp_all.sh    # Backup OpenERP pour avoir un backup toutes les 5 minutes
+                                                                                                                                                                              
+~        
